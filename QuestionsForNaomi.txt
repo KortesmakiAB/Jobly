@@ -1,0 +1,4 @@
+Models/company.js
+static async create() 
+    Why do a duplicate check? This is an extra query. Seems inefficient.
+    Why not insert info to PG and handle any PG errors that may arise?

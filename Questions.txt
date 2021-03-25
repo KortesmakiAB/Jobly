@@ -1,0 +1,28 @@
+Research for Answers:
+
+
+app.js
+app.use(morgan("tiny"));
+
+
+config.js
+require("dotenv").config();
+Why "const PORT = +process.env.PORT || 3001;"
+use strict
+
+
+company.test.js
+fail();
+
+
+models/company.js
+update()
+    const result = await db.query(querySql, [...values, handle]);
+
+
+config.test.js - complete
+
+
+app.test.js - complete
+
+
