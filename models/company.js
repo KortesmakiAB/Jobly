@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, buildQuery } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -59,6 +59,23 @@ class Company {
            FROM companies
            ORDER BY name`);
     return companiesRes.rows;
+  }
+
+  // accept user input and use to filter db search results.
+
+  static async filterAll(filterObj) {
+    try {
+      if (filterObj.minEmployees > filterObj.maxEmployees) throw new BadRequestError('maxEmployees must be greater than minEmployees.');
+        
+      const filterQuery = buildQuery(Object.entries(filterObj));
+
+      const filteredCos = await db.query(filterQuery);
+
+      return filteredCos.rows;
+
+    } catch (error) {
+      return error;
+    }
   }
 
   /** Given a company handle, return data about company.

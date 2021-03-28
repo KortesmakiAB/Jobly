@@ -1,0 +1,43 @@
+Research for Answers:
+
+
+app.js
+app.use(morgan("tiny"));
+
+
+config.js
+require("dotenv").config();
+Why "const PORT = +process.env.PORT || 3001;"
+use strict
+
+
+company.test.js
+fail();
+
+
+models/company.js
+update()
+    const result = await db.query(querySql, [...values, handle]);
+
+
+config.test.js - complete
+
+
+app.test.js - complete
+
+
+routes/_testCommon.jhs
+await db.query("BEGIN");
+await db.query("ROLLBACK");
+
+
+middleware/auth.js
+console.assert(user.isAdmin !== undefined,
+      "createToken passed user without isAdmin property");
+
+
+auth/auth.test.js
+describe("ensureLoggedIn",...
+    expect.assertions(1);           // what is this?
+
+!! I prob need to write tests in this file for "ensureAdmin"

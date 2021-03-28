@@ -19,4 +19,33 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+function buildQuery(filterArr){
+  let qString = `SELECT handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl" FROM companies WHERE`;
+
+  let i = 0;
+  for (let arr of filterArr) {
+    if (arr[0] === 'name'){
+      if (i === 0) qString += (` name ILIKE '%${arr[1]}%'`);
+      else qString += (` AND name ILIKE '%${arr[1]}%'`);
+    } 
+
+    else if (arr[0] === 'minEmployees'){
+      if (i === 0) qString += (` num_employees >= ${arr[1]}`);
+      else qString += (` AND num_employees >= ${arr[1]}`);
+    } 
+
+    else if (arr[0] === 'maxEmployees'){
+      if (i === 0) qString += (` num_employees <= ${arr[1]}`);
+      else qString += (` AND num_employees <= ${arr[1]}`);
+    } 
+
+    // TODO
+    else throw new BadRequestError('Filter categories are "name", "minEmployees", and "maxEmployees".');
+    
+    i++;
+  }
+
+  return qString;
+}
+
+module.exports = { sqlForPartialUpdate, buildQuery };
