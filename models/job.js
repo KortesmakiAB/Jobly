@@ -22,7 +22,7 @@ class Job {
     
         const job = jobResp.rows[0];
     
-        if (!job) throw new NotFoundError(`No job with id: ${id}.`);
+        if (!job) throw new NotFoundError(`No job found with id: ${id}.`);
     
         return job;
     }
@@ -40,7 +40,7 @@ class Job {
         const result = await db.query(sqlQueryTxt, [...values, id]);
         const updatedJob = result.rows[0];
 
-        if (!updatedJob) throw new NotFoundError(`No job found with id ${id}.`);
+        if (!updatedJob) throw new NotFoundError(`No job found with id: ${id}.`);
 
         return updatedJob;
     }

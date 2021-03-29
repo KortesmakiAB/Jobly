@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 const Job = require("./job");
 
 const {
@@ -39,7 +39,7 @@ describe('get(id) tests', () => {
             const id = 1000;
             await Job.get(id)
         } catch (error) {
-            expect(error).toEqual(new NotFoundError(`No job with id: 1000.`))    
+            expect(error).toEqual(new NotFoundError(`No job found with id: 1000.`))    
         }
     });
 });
@@ -70,13 +70,52 @@ describe('update(id) tests', () => {
 
         expect(updatedJob).toEqual(actualJob.rows[0]);
     });
+    
+    test("successful update with null fields", async function () {
+        const updateDataNulls = {
+            title: 'j1_updated',
+            salary: null,
+            equity: null
+        }
+
+        const job = await db.query(`SELECT id, company_handle AS "companyHandle" FROM jobs WHERE title = 'j1'`);
+        const id = job.rows[0].id;
+
+        let updatedJob = await Job.update(id, updateDataNulls);
+
+        expect(updatedJob).toEqual({
+            id,
+            ...updateDataNulls,
+            companyHandle: job.rows[0].companyHandle
+        });
+
+        const actualJob = await db.query(`SELECT id, title, salary, equity, company_handle AS "companyHandle" FROM jobs WHERE id = $1`, [id]);
+
+        expect(updatedJob).toEqual(actualJob.rows[0]);
+    });
 
     test('should throw error if job not found.', async () => {
         try {
-            const id = 1000;
-            await Job.get(id)
+            const updateData = {
+                title: 'j1_updated',
+                salary: 9999,
+                equity: '0.1111'
+            }
+            const id = 0;
+            await Job.update(id, updateData);
         } catch (error) {
-            expect(error).toEqual(new NotFoundError(`No job with id: 1000.`))    
+            expect(error).toEqual(new NotFoundError(`No job found with id: 0.`))    
+        }
+    });
+
+    test('should throw error if no data in request.', async () => {
+        try {
+            const job = await db.query(`SELECT id, company_handle AS "companyHandle" FROM jobs WHERE title = 'j1'`);
+            const id = job.rows[0].id;
+            
+            await Job.update(id, {})
+        } catch (error) {
+            expect(error).toEqual(new BadRequestError(`No data`));
         }
     });
 });
