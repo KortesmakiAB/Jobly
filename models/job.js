@@ -5,9 +5,25 @@ const { sqlForPartialUpdate } = require("../helpers/sql");
 
 class Job {
 
-    // static async create()
+    static async create(userDataObj) {
+        const { title, salary, equity, companyHandle } = userDataObj;
+     
 
-    // static async findAll()
+        const newJob = await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+                                        VALUES ($1,$2,$3,$4)
+                                        RETURNING id, title, salary, equity, company_handle AS "companyHandle"`,
+                                        [title, salary, equity, companyHandle]);
+        
+        return newJob.rows[0];
+    }
+
+    static async findAll() {
+
+        const allJobs = await db.query(`SELECT id, title, salary, equity, company_handle AS "companyHandle" 
+                                        FROM jobs`);
+
+        return allJobs.rows;
+    }
 
     static async get(id) {
         const jobResp = await db.query(

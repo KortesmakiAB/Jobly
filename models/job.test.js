@@ -2,6 +2,7 @@
 
 const db = require("../db");
 const { NotFoundError, BadRequestError } = require("../expressError");
+const { create } = require("./job");
 const Job = require("./job");
 
 const {
@@ -9,28 +10,106 @@ const {
     commonBeforeEach,
     commonAfterEach,
     commonAfterAll,
-  } = require("./_testCommon");
+} = require("./_testCommon");
   
-  beforeAll(commonBeforeAll);
-  beforeEach(commonBeforeEach);
-  afterEach(commonAfterEach);
-  afterAll(commonAfterAll);
-  
+beforeAll(commonBeforeAll);
+beforeEach(commonBeforeEach);
+afterEach(commonAfterEach);
+afterAll(commonAfterAll);
 
-describe('get(id) tests', () => {
+const testJob1 = {
+    title: 'j1',
+    salary: 10000,
+    equity: '0.1',
+    companyHandle: 'c1'
+};
+
+
+describe('create() method tests', () => {
+    
+    test('should successfully create a new job.', async () => {
+        const newJobTest = {
+            title: 'testCreateJob',
+            salary: 100,
+            equity: '0.100',
+            companyHandle: 'c1'
+        };
+
+        const createdJob = await Job.create(newJobTest);
+
+        const result = await db.query(`SELECT id, title, salary, equity, company_handle AS "companyHandle" 
+                                            FROM jobs
+                                            WHERE title = $1`, 
+                                        [newJobTest.title]);
+        const jobInDb = result.rows[0];
+
+        expect(createdJob).toEqual({
+            id: jobInDb.id,
+            ...newJobTest
+        });
+        expect(createdJob).toEqual(jobInDb);
+    });
+        
+    test('should throw Error if table no title.', async () => {
+        try {
+            const noTitle = {
+                title: '',
+                salary: 10000,
+                equity: '0.100',
+                companyHandle: 'c1'
+            };
+    
+            await Job.create(noTitle);
+        } catch (error) {
+            expect(error).toEqual(new Error('new row for relation "title" violates check constraint "jobs_salary_check"'));
+        }
+    });
+
+    test('should throw Error if negative salary.', async () => {
+        try {
+            const negativeSalary = {
+                title: 'testCreateJob',
+                salary: -10000,
+                equity: '0.100',
+                companyHandle: 'c1'
+            };
+    
+            await Job.create(negativeSalary);
+        } catch (error) {
+            expect(error).toEqual(new Error('new row for relation "jobs" violates check constraint "jobs_salary_check"'));
+        }
+    });
+});
+
+
+describe('findAll() method tests', () => {
+   
+    test('should return 3 jobs.', async () => {
+        const result = await db.query(`SELECT id from jobs WHERE title = $1`, ['j1']);
+        const id = result.rows[0].id;
+
+        const allJobs = await Job.findAll();
+       
+        expect(allJobs.length).toBe(3);
+        expect(allJobs[0]).toEqual({
+            id,
+            ...testJob1
+        });
+    });
+});
+
+
+describe('get(id) method tests', () => {
 
     test('should get only 1 job, by id.', async () => {
-        const result = await db.query(`SELECT id from jobs WHERE title = 'j1'`);
+        const result = await db.query(`SELECT id from jobs WHERE title = $1`, ['j1']);
         const id = result.rows[0].id;
 
         const job = await Job.get(id);
         
         expect(job).toEqual({
             id,
-            title: 'j1',
-            salary: 10000,
-            equity: '0.1',
-            companyHandle: 'c1'
+            ...testJob1
         });
     });
 
@@ -44,7 +123,7 @@ describe('get(id) tests', () => {
     });
 });
 
-describe('update(id) tests', () => {
+describe('update(id) method tests', () => {
 
     test('should update title, salary, equity. Not id or company_handle.', async () => {
         const updateData = {
@@ -120,7 +199,7 @@ describe('update(id) tests', () => {
     });
 });
 
-describe('remove(id) tests', () => {
+describe('remove(id) method tests', () => {
     
     test('should successfully delete job.', async () => {
         const resp = await db.query(`SELECT id FROM jobs WHERE title = $1`, ['j1']);
