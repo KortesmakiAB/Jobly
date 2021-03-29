@@ -8,8 +8,10 @@ app.use(morgan("tiny"));
 config.js
 require("dotenv").config();
 Why "const PORT = +process.env.PORT || 3001;"
-use strict
 
+
+use strict
+do I need to add this to any files that I created? Esp test files?
 
 company.test.js
 fail();
@@ -41,3 +43,10 @@ describe("ensureLoggedIn",...
     expect.assertions(1);           // what is this?
 
 !! I prob need to write tests in this file for "ensureAdmin"
+
+
+jobly-schema.sql 
+    Why does equity return a string?
+
+
+THINK THROUGH TESTS 

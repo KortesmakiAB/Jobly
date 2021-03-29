@@ -1,3 +1,9 @@
+middleware/auth.test.js
+    expect.assertions(2);  
+    I read the jest docs, and still don't understand.
+
+
+
 Models/company.js
 static async create() 
     Why do a duplicate check? This is an extra query. Seems inefficient.
