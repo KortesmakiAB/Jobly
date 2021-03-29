@@ -119,3 +119,26 @@ describe('update(id) tests', () => {
         }
     });
 });
+
+describe('remove(id) tests', () => {
+    
+    test('should successfully delete job.', async () => {
+        const resp = await db.query(`SELECT id FROM jobs WHERE title = $1`, ['j1']);
+        const id = resp.rows[0].id;
+
+        const deadJob = await Job.remove(id);
+        expect(deadJob).toBe(undefined);
+
+        const noJob = await db.query(`SELECT * FROM jobs where id = $1`, [id]);
+        expect(noJob.rows.length).toBe(0);
+    });
+    
+    test('should throw error if job not found.', async () => {
+        try {
+            const id = 0;
+            await Job.remove(id);
+        } catch (error) {
+            expect(error).toEqual(new NotFoundError(`No job found with id: 0.`));
+        }
+    });
+});

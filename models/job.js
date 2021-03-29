@@ -45,7 +45,17 @@ class Job {
         return updatedJob;
     }
 
-    // static async remove(id)
+    static async remove(id) {
+        const result = await db.query(
+            `DELETE
+             FROM jobs
+             WHERE id = $1
+             RETURNING id`,
+          [id]);
+      const job = result.rows[0];
+  
+      if (!job) throw new NotFoundError(`No job found with id: ${id}.`);
+    }
 }
 
 module.exports = Job;
