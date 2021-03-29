@@ -20,12 +20,13 @@ const {
 describe('get(id) tests', () => {
 
     test('should get only 1 job, by id.', async () => {
-        const id = await db.query(`SELECT id from jobs WHERE title = 'j1'`);
-        
-        const job = await Job.get(id.rows[0].id);
+        const result = await db.query(`SELECT id from jobs WHERE title = 'j1'`);
+        const id = result.rows[0].id;
+
+        const job = await Job.get(id);
         
         expect(job).toEqual({
-            id: id.rows[0].id,
+            id,
             title: 'j1',
             salary: 10000,
             equity: '0.1',
@@ -33,10 +34,49 @@ describe('get(id) tests', () => {
         });
     });
 
-    test('should throw error if company not found.', async () => {
-        const id = 1000;
-        const jobFail = await Job.get(id)
+    test('should throw error if job not found.', async () => {
+        try {
+            const id = 1000;
+            await Job.get(id)
+        } catch (error) {
+            expect(error).toEqual(new NotFoundError(`No job with id: 1000.`))    
+        }
+    });
+});
+
+describe('update(id) tests', () => {
+
+    test('should update title, salary, equity. Not id or company_handle.', async () => {
+        const updateData = {
+            title: 'j1_updated',
+            salary: 9999,
+            equity: '0.1111'
+        }
+
+        const job = await db.query(`SELECT id, company_handle AS "companyHandle" FROM jobs WHERE title = 'j1'`);
+        const id = job.rows[0].id;
+
+        const updatedJob = await Job.update(id, updateData);
+
+        // updateData.equity = String(updateData.equity);
         
-        expect(jobFail).toEqual(new NotFoundError(`No job with id: ${id}.`))
+        expect(updatedJob).toEqual({
+            id,
+            ...updateData,
+            companyHandle: job.rows[0].companyHandle
+        });
+
+        const actualJob = await db.query(`SELECT id, title, salary, equity, company_handle AS "companyHandle" FROM jobs WHERE id = $1`, [id]);
+
+        expect(updatedJob).toEqual(actualJob.rows[0]);
+    });
+
+    test('should throw error if job not found.', async () => {
+        try {
+            const id = 1000;
+            await Job.get(id)
+        } catch (error) {
+            expect(error).toEqual(new NotFoundError(`No job with id: 1000.`))    
+        }
     });
 });

@@ -17,11 +17,6 @@ company.test.js
 fail();
 
 
-models/company.js
-update()
-    const result = await db.query(querySql, [...values, handle]);
-
-
 config.test.js - complete
 
 
@@ -41,12 +36,7 @@ console.assert(user.isAdmin !== undefined,
 auth/auth.test.js
 describe("ensureLoggedIn",...
     expect.assertions(1);           // what is this?
-
 !! I prob need to write tests in this file for "ensureAdmin"
-
-
-jobly-schema.sql 
-    Why does equity return a string?
 
 
 THINK THROUGH TESTS 

@@ -1,10 +1,17 @@
 middleware/auth.test.js
     expect.assertions(2);  
-    I read the jest docs, and still don't understand.
+    I read the Jest docs, and still don't understand ".assertions(num)"
 
 
 
 Models/company.js
 static async create() 
-    Why do a duplicate check? This is an extra query. Seems inefficient.
-    Why not insert info to PG and handle any PG errors that may arise?
+    Why do a "duplicateCheck"? This is an extra query. Seems inefficient.
+    Why not insert info to db and handle any errors that may arise?
+
+The Models class/static methods do not use try/catch, what is the rationale? eg models/company.js
+
+models/job.test.js -> .get() & .update() 
+    Why does "equity" return from db as a string? aka, why does NUMERIC type return with ""?
+    When I "INSERT whatever INTO jobs" NUMERIC(equity) seems to accept either a string or a number.
+        Should the equity type in JS be a string or number?
