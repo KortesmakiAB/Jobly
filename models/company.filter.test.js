@@ -46,13 +46,15 @@ describe('Company.filterAll() tests.', () => {
     // });
     
     test('should throw error if minEmployees parameter is greater than the maxEmployees parameter.', async () => {
-        const invalidFilter = {
-            minEmployees: 30,
-            maxEmployees: 20
-        };
-        
-        const resp = await Company.filterAll(invalidFilter); 
-
-        expect(resp).toEqual(new BadRequestError('maxEmployees must be greater than minEmployees.'));
+        try {
+            const invalidFilter = {
+                minEmployees: 30,
+                maxEmployees: 20
+            };
+            
+            const resp = await Company.filterAll(invalidFilter); 
+        } catch (error) {
+            expect(error).toEqual(new BadRequestError('maxEmployees must be greater than minEmployees.'));
+        }
     });
 });

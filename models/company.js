@@ -64,18 +64,13 @@ class Company {
   // accept user input and use to filter db search results.
 
   static async filterAll(filterObj) {
-    try {
-      if (filterObj.minEmployees > filterObj.maxEmployees) throw new BadRequestError('maxEmployees must be greater than minEmployees.');
+    if (filterObj.minEmployees > filterObj.maxEmployees) throw new BadRequestError('maxEmployees must be greater than minEmployees.');
         
-      const filterQuery = buildQuery(Object.entries(filterObj));
+    const filterQuery = buildQuery(Object.entries(filterObj));
 
-      const filteredCos = await db.query(filterQuery);
+    const filteredCos = await db.query(filterQuery);
 
-      return filteredCos.rows;
-
-    } catch (error) {
-      return error;
-    }
+    return filteredCos.rows;
   }
 
   /** Given a company handle, return data about company.
