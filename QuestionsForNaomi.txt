@@ -15,3 +15,9 @@ models/job.test.js -> .get() & .update()
     Why does "equity" return from db as a string? aka, why does NUMERIC type return with ""?
     When I "INSERT whatever INTO jobs" NUMERIC(equity) seems to accept either a string or a number.
         Should the equity type in JS be a string or number?
+
+-----------------------
+
+post-call 3/29/21
+How could I refactor or re-write helpers/sql.js buildJobQuery() and/or buildCompanyQuery()?
+AB: check answer code too.

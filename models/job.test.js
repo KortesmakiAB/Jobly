@@ -25,7 +25,7 @@ const testJob1 = {
 };
 
 
-describe('create() method tests', () => {
+describe('Job.create() method tests', () => {
     
     test('should successfully create a new job.', async () => {
         const newJobTest = {
@@ -82,7 +82,7 @@ describe('create() method tests', () => {
 });
 
 
-describe('findAll() method tests', () => {
+describe('Job.findAll() method tests', () => {
    
     test('should return 3 jobs.', async () => {
         const result = await db.query(`SELECT id from jobs WHERE title = $1`, ['j1']);
@@ -90,7 +90,7 @@ describe('findAll() method tests', () => {
 
         const allJobs = await Job.findAll();
        
-        expect(allJobs.length).toBe(3);
+        expect(allJobs.length).toBe(4);
         expect(allJobs[0]).toEqual({
             id,
             ...testJob1
@@ -99,7 +99,30 @@ describe('findAll() method tests', () => {
 });
 
 
-describe('get(id) method tests', () => {
+describe('Job.filterAll() method tests', () => {
+
+    test('should filter by title (including partial matches, case insensitive), minSalary (inclusive), hasEquity (Boolean).', async () => {
+        const validFilter = {
+            title: "j",
+            minSalary: 20000,
+            hasEquity: true
+        };
+        const coId = await db.query(`SELECT id FROM jobs WHERE title = $1`, ['j2']);
+
+        const filteredJobs = await Job.filterAll(validFilter);
+        
+        expect(filteredJobs).toEqual([{
+            id: coId.rows[0].id,
+            title: 'j2',
+            salary: 20000,
+            equity: '0.2',
+            companyHandle: 'c1'
+        }]);
+    });
+});
+
+
+describe('Job.get(id) method tests', () => {
 
     test('should get only 1 job, by id.', async () => {
         const result = await db.query(`SELECT id from jobs WHERE title = $1`, ['j1']);
@@ -123,7 +146,7 @@ describe('get(id) method tests', () => {
     });
 });
 
-describe('update(id) method tests', () => {
+describe('Job.update(id) method tests', () => {
 
     test('should update title, salary, equity. Not id or company_handle.', async () => {
         const updateData = {
@@ -199,7 +222,7 @@ describe('update(id) method tests', () => {
     });
 });
 
-describe('remove(id) method tests', () => {
+describe('Job.remove(id) method tests', () => {
     
     test('should successfully delete job.', async () => {
         const resp = await db.query(`SELECT id FROM jobs WHERE title = $1`, ['j1']);

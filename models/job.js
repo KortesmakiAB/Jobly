@@ -1,6 +1,6 @@
 const db = require("../db");
 const { NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, buildJobQuery } = require("../helpers/sql");
 
 
 class Job {
@@ -23,6 +23,15 @@ class Job {
                                         FROM jobs`);
 
         return allJobs.rows;
+    }
+
+    static async filterAll(filterData){
+        
+        const queryObj = buildJobQuery(Object.entries(filterData));
+
+        const filteredJobs = await db.query(queryObj.sqlString, queryObj.vals);
+        
+        return filteredJobs.rows;
     }
 
     static async get(id) {

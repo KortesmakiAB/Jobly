@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, buildQuery } = require("../helpers/sql");
+const { sqlForPartialUpdate, buildCompanyQuery } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -66,9 +66,9 @@ class Company {
   static async filterAll(filterObj) {
     if (filterObj.minEmployees > filterObj.maxEmployees) throw new BadRequestError('maxEmployees must be greater than minEmployees.');
         
-    const filterQuery = buildQuery(Object.entries(filterObj));
-
-    const filteredCos = await db.query(filterQuery);
+    const queryObj = buildCompanyQuery(Object.entries(filterObj));
+    
+    const filteredCos = await db.query(queryObj.sqlString, queryObj.vals);
 
     return filteredCos.rows;
   }
