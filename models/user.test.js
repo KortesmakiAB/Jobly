@@ -228,3 +228,24 @@ describe("remove", function () {
     }
   });
 });
+
+/************************************** apply */
+
+describe('User.apply() tests', () => {
+
+  test('should add application to db.', async () => {
+    const result = await db.query(`SELECT id FROM jobs WHERE title = 'j1'`);
+    const jobId = result.rows[0].id;
+    const username = 'u1';
+    
+    const application = await User.apply(username, jobId);
+    
+    expect(application).toEqual({
+      username,
+      jobId
+    });
+
+    const checkDb = await db.query(`SELECT username, job_id AS "jobId" FROM applications WHERE username = '${username}' AND job_id = '${jobId}'`);
+    expect(application).toEqual(checkDb.rows[0]);
+  });
+});

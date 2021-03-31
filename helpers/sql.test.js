@@ -24,7 +24,6 @@ describe('sqlForPartialUpdate() tests', () => {
     });
 });
 
-// TODO re-work these tests.
 describe('buildCompanyQuery() tests', () => {
    
     test('should successfully build company query with all 3 filtering options.', () => {

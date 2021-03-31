@@ -119,4 +119,6 @@ router.delete("/:username", ensureLoggedIn, ensureAdminOrCurrUser, async functio
 });
 
 
+// router.post("/:username/jobs")
+
 module.exports = router;
