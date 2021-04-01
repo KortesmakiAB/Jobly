@@ -10,6 +10,7 @@ const {
 } = require("../expressError");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
+const Job = require("./job");
 
 /** Related functions for users. */
 
@@ -117,8 +118,7 @@ class User {
 
   /** Given a username, return data about user.
    *
-   * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   * Returns { username, first_name, last_name, is_admin, jobs: [ jobId, jobId, ... ] }
    *
    * Throws NotFoundError if user not found.
    **/
@@ -138,6 +138,20 @@ class User {
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+
+    const jobIds = await db.query(`
+      SELECT job_id from applications WHERE username = $1`,
+      [username]
+    );
+    
+    // AB naive approach
+    // user.jobs = [];
+    // for (row of jobIds.rows){
+    //   user.jobs.push(row.job_id)
+    // }
+
+    // answer key adapted
+    user.jobs = jobIds.rows.map(app => app.job_id);
 
     return user;
   }
@@ -205,13 +219,19 @@ class User {
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
 
-  static async apply(userId, jobId) {
-    const application = await db.query(`
+  static async apply(username, jobId) {
+    const validUsername = await db.query(`SELECT * FROM users WHERE username = $1`, [username]);
+    const validJobId = await db.query(`SELECT * FROM jobs WHERE id = $1`, [jobId]);
+    if (!validUsername.rows[0] || !validJobId.rows[0]) throw new NotFoundError(`Invalid username and/or job id.`);
+
+    const dbQuery = await db.query(`
       INSERT INTO applications (username, job_id) 
       VALUES ($1, $2)
-      RETURNING username, job_id AS "jobId"`, [userId, jobId]);
+      RETURNING username, job_id AS "jobId"`, [username, jobId]);
 
-    return application.rows[0];
+    const application = dbQuery.rows[0];
+
+    return application;
   }
 }
 

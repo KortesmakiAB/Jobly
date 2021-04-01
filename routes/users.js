@@ -119,6 +119,27 @@ router.delete("/:username", ensureLoggedIn, ensureAdminOrCurrUser, async functio
 });
 
 
-// router.post("/:username/jobs")
+/** POST /  => { applied: jobId }
+ *
+ * Adds a job application. 
+ */
+
+router.post("/:username/jobs/:id", ensureLoggedIn, async function (req, res, next) {
+  try {
+    // TODO
+    // check if admin or logged-in user
+
+
+    const username = req.params.username;
+    const jobId = req.params.id;
+    
+    const appliedJob = await User.apply(username, jobId);
+
+    return res.status(201).json({ applied: appliedJob.jobId });
+
+  } catch (error) {
+    return next(error);
+  }
+});
 
 module.exports = router;

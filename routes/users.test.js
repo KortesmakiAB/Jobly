@@ -5,6 +5,7 @@ const request = require("supertest");
 const db = require("../db.js");
 const app = require("../app");
 const User = require("../models/user");
+const { NotFoundError } = require("../expressError");
 
 const {
   commonBeforeAll,
@@ -12,7 +13,8 @@ const {
   commonAfterEach,
   commonAfterAll,
   u1Token,
-  adminToken
+  adminToken,
+  testJobIds
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -192,6 +194,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [testJobIds[0], testJobIds[1]]
       },
     });
   });
@@ -207,6 +210,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [testJobIds[0], testJobIds[1]]
       },
     });
   });
@@ -342,5 +346,61 @@ describe("DELETE /users/:username", function () {
         .delete(`/users/nope`)
         .set("authorization", `Bearer ${adminToken}`);
     expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/************************************** POST /users/:username/jobs/:id  */
+
+describe('POST /users/:username/jobs/:id ', () => {
+  
+  test('should successfully post job application as admin.', async () => {
+    const jobId = testJobIds[2]
+
+    const appliedJob = await request(app).post(`/users/u1/jobs/${jobId}`).set("authorization", `Bearer ${adminToken}`);
+
+    expect(appliedJob.body).toEqual({ applied: jobId });
+    expect(appliedJob.statusCode).toBe(201);
+    
+    const dbJobApp = await db.query(`SELECT username, job_id AS "jobId" FROM applications WHERE username = $1 AND job_id = $2`, ['u1', jobId]);
+    expect(appliedJob.body.applied).toBe(dbJobApp.rows[0].jobId);
+  });
+  
+  test('should successfully post job application as user.', async () => {
+    const jobId = testJobIds[3];
+
+    const appliedJob = await request(app).post(`/users/u1/jobs/${jobId}`).set("authorization", `Bearer ${adminToken}`);
+
+    expect(appliedJob.body).toEqual({ applied: jobId });
+    expect(appliedJob.statusCode).toBe(201);
+    
+    const dbJobApp = await db.query(`SELECT username, job_id AS "jobId" FROM applications WHERE username = $1 AND job_id = $2`, ['u1', jobId]);
+    expect(appliedJob.body.applied).toBe(dbJobApp.rows[0].jobId);
+  });
+
+  test('should 404 if username not found.', async () => {
+    const jobId = testJobIds[3];
+    
+    const invalidUser = await request(app).post(`/users/invalidUsername/jobs/${jobId}`).set("authorization", `Bearer ${adminToken}`);
+
+    expect(invalidUser.statusCode).toBe(404);
+    expect(invalidUser.body.error.message).toBe('Invalid username and/or job id.');
+  });
+
+  test('should 404 if jobId not found.', async () => {
+    const jobId = 0;
+    
+    const invalidUser = await request(app).post(`/users/u1/jobs/${jobId}`).set("authorization", `Bearer ${adminToken}`);
+
+    expect(invalidUser.statusCode).toBe(404);
+    expect(invalidUser.body.error.message).toBe('Invalid username and/or job id.');
+  });
+
+  test('should 401 if anon user.', async () => {
+    const jobId = testJobIds[3];
+    
+    const invalidUser = await request(app).post(`/users/u1/jobs/${jobId}`);
+
+    expect(invalidUser.statusCode).toBe(401);
+    expect(invalidUser.body.error.message).toBe('Unauthorized');
   });
 });

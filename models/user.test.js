@@ -12,6 +12,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -140,6 +141,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [testJobIds[0], testJobIds[1]]
     });
   });
 
@@ -234,8 +236,7 @@ describe("remove", function () {
 describe('User.apply() tests', () => {
 
   test('should add application to db.', async () => {
-    const result = await db.query(`SELECT id FROM jobs WHERE title = 'j1'`);
-    const jobId = result.rows[0].id;
+    const jobId = testJobIds[2];
     const username = 'u1';
     
     const application = await User.apply(username, jobId);
@@ -247,5 +248,29 @@ describe('User.apply() tests', () => {
 
     const checkDb = await db.query(`SELECT username, job_id AS "jobId" FROM applications WHERE username = '${username}' AND job_id = '${jobId}'`);
     expect(application).toEqual(checkDb.rows[0]);
+  });
+
+  test('should throw NotFoundError if invalid username.', async () => {
+    try {
+      const jobId = testJobIds[3]
+      const username = 'invalidUsername';
+      
+      await User.apply(username, jobId);
+     
+    } catch (error) {
+      expect(error).toEqual(new NotFoundError('Invalid username and/or job id.'));
+    }
+  });
+
+  test('should throw NotFoundError if invalid jobId.', async () => {
+    try {
+      const jobId = 0;
+      const username = 'u1';
+      
+      await User.apply(username, jobId);
+     
+    } catch (error) {
+      expect(error).toEqual(new NotFoundError('Invalid username and/or job id.'));
+    }
   });
 });
