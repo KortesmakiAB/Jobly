@@ -96,7 +96,6 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
 
-    // TODO unit testing (and integrated) needed here.
     const companyJobs = await db.query(`
             SELECT id, title, salary, equity, company_handle AS "companyHandle"
             FROM jobs

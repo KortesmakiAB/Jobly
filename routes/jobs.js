@@ -10,9 +10,20 @@ const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
+const jobFilterSchema = require("../schemas/jobFilter.json");
+const jobUpdateSchema = require("../schemas/jobUpdate.json");
 
 
 const router = new express.Router();
+
+
+/** POST / { job } => { job }
+ *
+ * Requires { title, salary, equity, companyHandle }
+ *
+ * Returns { id, title, salary, equity, companyHandle }
+ *
+ */
 
 router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
     try {
@@ -29,6 +40,85 @@ router.post("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
     }
   });
 
+/** GET /  =>  { jobs: [ { id, title, salary, equity, companyHandle }, ...] }
+ *
+ * Can filter on provided search filters:
+ *  - title (will find case-insensitive, partial matches)
+ *  - minSalary
+ *  - hasEquity (Boolean)
+ *
+ */
 
+ router.get("/", async function (req, res, next) {
+    try {
+      if (req.query.minSalary) req.query.minSalary = parseInt(req.query.minSalary);
+      if (req.query.hasEquity) req.query.hasEquity = JSON.parse(req.query.hasEquity.toLowerCase());
+      
+      const validator = jsonschema.validate((req.query), jobFilterSchema);
+      if (!validator.valid) {
+        const errs = validator.errors.map(e => e.stack);
+        throw new BadRequestError(errs);
+      }
+  
+      let jobs;
+      if (req.query.title || req.query.minSalary || req.query.hasEquity) jobs = await Job.filterAll(req.query);
+      else jobs = await Job.findAll();
+    
+      return res.json({ jobs });
+  
+    } catch (err) {
+      return next(err);
+    }
+  });
 
+/** GET /:id  =>  { job: { id, title, salary, equity, companyHandle }  } */
+
+router.get("/:id", async function (req, res, next) {
+    try {
+        if (req.query.minSalary) req.query.minSalary = parseInt(req.query.minSalary);
+        if (req.query.hasEquity) req.query.hasEquity = JSON.parse(req.query.hasEquity.toLowerCase());
+
+        const job = await Job.get(req.params.id);
+        return res.json({ job });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+/** PATCH /:id { fld1, fld2, ... } => { company }
+ *
+ * fields can be: { title, salary, equity }
+ *
+ * Returns { id, title, salary, equity, companyHandle }
+ *
+ */
+
+router.patch("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+    try {
+        if (req.body.salary) req.body.salary = parseInt(req.body.salary);
+        // if (req.query.hasEquity) req.query.hasEquity = JSON.parse(req.query.hasEquity.toLowerCase());
+
+        const validator = jsonschema.validate(req.body, jobUpdateSchema);
+        if (!validator.valid) {
+            const errs = validator.errors.map(e => e.stack);
+            throw new BadRequestError(errs);
+        }
+    
+        const job = await Job.update(req.params.id, req.body);
+        return res.json({ job });
+    } catch (err) {
+         return next(err);
+    }
+});
+
+/** DELETE /:id =>  { deleted: id } */
+
+router.delete("/:id", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+    try {
+      await Job.remove(req.params.id);
+      return res.json({ deleted: req.params.id });
+    } catch (err) {
+      return next(err);
+    }
+});
 module.exports = router;

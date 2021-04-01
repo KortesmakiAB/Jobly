@@ -98,6 +98,36 @@ describe("get", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs: [
+        {
+          "companyHandle": "c1",
+          "equity": "0.1",
+          "id": expect.any(Number),
+          "salary": 10000,
+          "title": "j1",
+        },
+        {
+          "companyHandle": "c1",
+          "equity": "0.2",
+          "id": expect.any(Number),
+          "salary": 20000,
+          "title": "j2",
+        },
+        {
+          "companyHandle": "c1",
+          "equity": null,
+          "id": expect.any(Number),
+          "salary": 30000,
+          "title": "j3",
+        },
+        {
+          "companyHandle": "c1",
+          "equity": null,
+          "id": expect.any(Number),
+          "salary": 40000,
+          "title": "test4",
+        },
+      ]  
     });
   });
 

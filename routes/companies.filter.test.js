@@ -32,7 +32,6 @@ describe('GET /companies filtering test', () => {
         });
     });
     
-    
     test('should successfully filter min/max.', async () => {
         const min = 2;
         const max = 2;

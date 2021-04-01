@@ -11,7 +11,7 @@ describe('sqlForPartialUpdate() tests', () => {
         const result = sqlForPartialUpdate(data, jsToSql);
         
         expect(result).toEqual({
-            setCols: '"first_name"=$1, "age"=$2',
+            setCols: 'first_name = $1, age = $2',
             values: [data.firstName, data.age]
         });
     });

@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "required": [   ],
+    "properties": {
+        "title": {
+            "$id": "#/properties/title",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+        },
+        "minSalary": {
+            "$id": "#/properties/minSalary",
+            "examples": [
+                10000
+            ],
+            "title": "The minSalary schema",
+            "type": "integer"
+        },
+        "hasEquity": {
+            "$id": "#/properties/hasEquity",
+            "examples": [
+                true
+            ],
+            "title": "The hasEquity schema",
+            "type": "boolean"
+        }
+    },
+    "additionalProperties": false
+}
