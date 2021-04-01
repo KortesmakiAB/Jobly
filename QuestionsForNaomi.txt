@@ -4,13 +4,6 @@ middleware/auth.test.js
 
 
 
-Models/company.js
-static async create() 
-    Why do a "duplicateCheck"? This is an extra query. Seems inefficient.
-    Why not insert info to db and handle any errors that may arise?
-
-The Models class/static methods do not use try/catch, what is the rationale? eg models/company.js
-
 models/job.test.js -> .get() & .update() 
     Why does "equity" return from db as a string? aka, why does NUMERIC type return with ""?
     When I "INSERT whatever INTO jobs" NUMERIC(equity) seems to accept either a string or a number.
